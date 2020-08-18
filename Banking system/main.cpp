@@ -1,4 +1,5 @@
 #include<iostream>
+#include<fstream>
 
 using namespace std;
 
@@ -49,7 +50,7 @@ void account::access(int &flag,int &num){
 }
 
 void intro();   //介绍
-
+void write_account();
 int main(){
 
     char ch;
@@ -70,6 +71,8 @@ int main(){
 		system("cls");
         switch(ch){
             case '1':
+                write_account();
+                break;
             case '2':
             case '3':
             case '4':
@@ -107,5 +110,13 @@ void intro(){
     cin.get();
 }
 
+void write_account(){
+    account ac;
+    ofstream outfile;
+    outfile.open("account.dat", ios::binary | ios::app);    //以二进制方式在文件末尾添加数据
+    ac.create_account();
+    outfile.write(reinterpret_cast<char *>(&ac),sizeof(account));
+    outfile.close();
+}
 
 
