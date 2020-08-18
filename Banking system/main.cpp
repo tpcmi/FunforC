@@ -11,7 +11,9 @@ public:
     void create_account();  //创建账户
     void show_account();    //显示数据库中当前所有账户信息
     void modify();  //修改账户所属
-    void access(int&,int&);  //存取
+    void access(int,int);  //存取
+    int return_no() const { return account_number; }    //返回账户账号
+    int return_deposit() const { return deposit; }  //返回存款数额
 };
 
 // Todo:检查新创建账户序号是否冲突
@@ -42,7 +44,7 @@ void account::modify(){
     cin >> deposit;
 }
 
-void account::access(int &flag,int &num){
+void account::access(int flag,int num){
     if(flag)
         deposit += num;
     else
@@ -50,10 +52,13 @@ void account::access(int &flag,int &num){
 }
 
 void intro();   //介绍
-void write_account();
-int main(){
+void write_account();   //创建用户
+void deposit_withdraw(int,int);
+int main()
+{
 
-    char ch;
+    char op;    //选项
+    int num;
     intro();
     do{
         system("cls");
@@ -67,14 +72,22 @@ int main(){
 		cout<<"\n\n\t07. MODIFY AN ACCOUNT";
 		cout<<"\n\n\t08. EXIT";
 		cout<<"\n\n\tSelect Your Option (1-8) ";
-		cin>>ch;
+		cin>>op;
 		system("cls");
-        switch(ch){
+        switch(op){
             case '1':
                 write_account();
                 break;
             case '2':
+                cout << "\n\n\tEnter the account No. :";
+                cin >> num;
+                deposit_withdraw(num, 1);
+                break;
             case '3':
+                cout << "\n\n\tEnter the account No. :";
+                cin >> num;
+                deposit_withdraw(num, -1);
+                break;
             case '4':
             case '5':
             case '6':
@@ -85,14 +98,13 @@ int main(){
             default:
                 cout << "\n\n\tInvalid Operation! Select again!";
         }
-        if(ch!='8'){
+        if(op!='8'){
             cin.ignore();
             cin.get();
         }
-    } while (ch != '8');
+    } while (op != '8');
 
     return 0;
-
 }
 
 void intro(){
@@ -115,8 +127,44 @@ void write_account(){
     ofstream outfile;
     outfile.open("account.dat", ios::binary | ios::app);    //以二进制方式在文件末尾添加数据
     ac.create_account();
-    outfile.write(reinterpret_cast<char *>(&ac),sizeof(account));
+    outfile.write(reinterpret_cast<char *>(&ac),sizeof(account));   //强制转换为char型；
     outfile.close();
 }
 
-
+//Todo:取钱失败后选择重新输入金额还是退出主页面
+void deposit_withdraw(int num, int option){
+    account ac;
+    fstream file;
+    bool found = false;
+    int amount;
+    file.open("account.dat", ios::binary | ios::in | ios::out);
+    if(!file){
+        cout << "File could not be open! Press any key....";
+        return;
+    }
+    while(!file.eof() && found==false){
+        file.read(reinterpret_cast<char *>(&ac), sizeof(account));
+        if(ac.return_no()==num){
+            ac.show_account();
+            if(option==1){
+                cout << "\n\n\tEnter the amount to be deposited";
+                cin >> amount;
+                ac.access(option, amount);
+            }
+            else{
+                cout << "\n\n\tEnter the amount to be withdrawn";
+                cin >> amount;
+                int pre = ac.return_deposit();
+                if(amount>pre)
+                    cout << "Insufficient balance!";
+                else
+                    ac.access(option, amount);
+            }
+            cout << "\n\n\tRecord updated ";
+            found = true;
+        }
+    }
+    file.close();
+    if(found==false)
+        cout << "\n\nRecord Not Found!";
+}
