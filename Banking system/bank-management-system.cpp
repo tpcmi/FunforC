@@ -350,7 +350,7 @@ void deposit_withdraw(int n, int option)
 					cout<<"Insufficience balance";
 				else
 					ac.draw(amt);
-		      }
+			}
 			int pos=(-1)*static_cast<int>(sizeof(ac));
 			File.seekp(pos,ios::cur);
 			File.write(reinterpret_cast<char *> (&ac), sizeof(account));

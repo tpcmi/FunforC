@@ -1,5 +1,6 @@
 #include<iostream>
 #include<fstream>
+#include<iomanip>
 
 using namespace std;
 
@@ -14,6 +15,7 @@ public:
     void access(int,int);  //存取
     int return_no() const { return account_number; }    //返回账户账号
     int return_deposit() const { return deposit; }  //返回存款数额
+    void report() const;  //返回账户信息
 };
 
 // Todo:检查新创建账户序号是否冲突
@@ -51,9 +53,15 @@ void account::access(int flag,int num){
         deposit -= num;
 }
 
+void account::report() const {
+    cout<<account_number<<setw(10)<<" "<<user<<setw(10)<<deposit<<endl;
+}
+
 void intro();   //介绍
 void write_account();   //创建用户
 void deposit_withdraw(int,int);
+void display_deposit(int);   //显示余额
+void display_all(); //显示所有账户信息
 int main()
 {
 
@@ -89,7 +97,13 @@ int main()
                 deposit_withdraw(num, -1);
                 break;
             case '4':
+                cout << "\n\n\tEnter the account No. :";
+                cin >> num;
+                display_deposit(num);
+                break;
             case '5':
+                display_all();
+                break;
             case '6':
             case '7':
             case '8':
@@ -160,6 +174,10 @@ void deposit_withdraw(int num, int option){
                 else
                     ac.access(option, amount);
             }
+            // 
+            int pos = (-1) * static_cast<int>(sizeof(ac));
+            file.seekp(pos, ios::cur);
+            file.write(reinterpret_cast<char *>(&ac),sizeof(account));
             cout << "\n\n\tRecord updated ";
             found = true;
         }
@@ -168,3 +186,43 @@ void deposit_withdraw(int num, int option){
     if(found==false)
         cout << "\n\nRecord Not Found!";
 }
+
+void display_deposit(int num){
+    account ac;
+    bool found = false;
+    ifstream file;
+    file.open("account.dat", ios::binary);
+    if(!file){
+        cout << "File could not open! Press any key...";
+        return;
+    }
+    cout << "\nBalance details\n";
+    while(file.read(reinterpret_cast<char *>(&ac),sizeof(account))){
+        if(ac.return_no()==num){
+            ac.show_account();
+            found = true;
+        }
+    }
+    file.close();
+    if(found==false)
+        cout << "\n\nAccount number dose not exist!";
+}
+
+void display_all(){
+    account ac;
+    ifstream file;
+    file.open("account.dat",ios::binary);
+    if(!file){
+        cout << "File could not open! Press any key...";
+        return;
+    }
+    cout << "\n\n\tAccount holder list\n\n";
+    cout<<"==========================================\n";
+	cout<<"A/c no.      NAME           Balance\n";
+	cout<<"==========================================\n";
+    while(file.read(reinterpret_cast<char*>(&ac),sizeof(account)))
+        ac.report();
+    file.close();
+}
+
+
