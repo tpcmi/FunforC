@@ -18,7 +18,7 @@ public:
     void report() const;  //返回账户信息
 };
 
-// Todo:检查新创建账户序号是否冲突
+//Todo:检查新建账号是否冲突
 void account::create_account(){
     cout << "\nEnter The Account No.:";
     cin >> account_number;
@@ -47,14 +47,14 @@ void account::modify(){
 }
 
 void account::access(int flag,int num){
-    if(flag)
+    if(flag==1)
         deposit += num;
     else
         deposit -= num;
 }
 
 void account::report() const {
-    cout<<account_number<<setw(10)<<" "<<user<<setw(10)<<deposit<<endl;
+    cout<<account_number<<setw(13)<<" "<<user<<setw(13)<<" "<<deposit<<endl;
 }
 
 void intro();   //介绍
@@ -62,6 +62,9 @@ void write_account();   //创建用户
 void deposit_withdraw(int,int);
 void display_deposit(int);   //显示余额
 void display_all(); //显示所有账户信息
+void delete_account(int); //删除账户
+void modify_account(int);   //修改账户所属
+
 int main()
 {
 
@@ -69,7 +72,7 @@ int main()
     int num;
     intro();
     do{
-        system("cls");
+        system("clear");
         cout<<"\n\n\n\tMAIN MENU";
 		cout<<"\n\n\t01. NEW ACCOUNT";
 		cout<<"\n\n\t02. DEPOSIT AMOUNT";
@@ -81,7 +84,7 @@ int main()
 		cout<<"\n\n\t08. EXIT";
 		cout<<"\n\n\tSelect Your Option (1-8) ";
 		cin>>op;
-		system("cls");
+		system("clear");
         switch(op){
             case '1':
                 write_account();
@@ -105,7 +108,15 @@ int main()
                 display_all();
                 break;
             case '6':
+                cout << "\n\n\tEnter the account No. :";
+                cin >> num;
+                delete_account(num);
+                break;
             case '7':
+                cout << "\n\n\tEnter the account No. :";
+                cin >> num;
+                modify_account(num);
+                break;
             case '8':
                 cout<<"\n\n\tThanks for using bank managemnt system!\n";
                 break;
@@ -140,6 +151,7 @@ void write_account(){
     account ac;
     ofstream outfile;
     outfile.open("account.dat", ios::binary | ios::app);    //以二进制方式在文件末尾添加数据
+
     ac.create_account();
     outfile.write(reinterpret_cast<char *>(&ac),sizeof(account));   //强制转换为char型；
     outfile.close();
@@ -225,4 +237,52 @@ void display_all(){
     file.close();
 }
 
+void delete_account(int num){
+    account ac;
+    ofstream ofile;
+    ifstream ifile;
+    ifile.open("account.dat", ios::binary);
+    if(!ifile){
+        cout << "File could not open! Press any key...";
+        return;
+    }
+    ofile.open("tmp.dat", ios::binary);
+    ifile.seekg(0, ios::beg);
+    while (ifile.read(reinterpret_cast<char *>(&ac),sizeof(account))){
+        if(ac.return_no()!=num)
+            ofile.write(reinterpret_cast<char *>(&ac),sizeof(account));
+    }
+    ifile.close();
+    ofile.close();
+    remove("account.dat");
+    rename("tmp.dat", "account.dat");
+    cout << "\n\n\tRecord deleted ... ";
+}
 
+void modify_account(int num){
+    bool found = false;
+    account ac;
+    fstream file;
+    file.open("account.dat", ios::binary | ios::in | ios::out);
+    if(!file){
+        cout << "File could not open! Press any key...";
+        return;
+    }
+    while(!file.eof() && found==false){
+        file.read(reinterpret_cast<char *>(&ac), sizeof(account));
+        if(ac.return_no()==num){
+            ac.show_account();
+            cout << "\n\nEnter the information of account" << endl;
+            ac.modify();
+            int pos = (-1) * static_cast<int>(sizeof(account));
+            file.seekp(pos, ios::cur);
+            file.write(reinterpret_cast<char *>(&ac), sizeof(account));
+            cout << "\n\n\t Record updated.";
+            found = true;
+        }
+    }
+    file.close();
+    if(found==false){
+        cout << "\n\nRecord not found!";
+    }
+}

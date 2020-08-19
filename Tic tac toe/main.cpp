@@ -72,7 +72,7 @@ int checkwin(int &count){
 
 // 更改屏幕值；
 void board(){
-	system("cls");
+	system("clear"); //widows system("cls");
 	cout << "=== Tic tac toe ===" << endl;
 	cout << "Player 1: 'X' , Player 2: 'O' " << endl;
 	cout << endl;
