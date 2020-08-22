@@ -2,4 +2,5 @@
     井字棋游戏
 ## Banking system(200819)
     银行业务系统
-    TODO：修改账户所属，查重...
+## Student Record System(200822)
+    学生成绩登记查询系统
