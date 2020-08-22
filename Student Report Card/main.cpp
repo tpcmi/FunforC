@@ -6,7 +6,30 @@ using namespace std;
 
 class student
 {
+private:
+    int id;
+    char name[50];
+    int pMarks, cMarks, mMarks, eMarks, csMarks;
+    double per;
+    char grade;
+    void calculate();   //计算学生grade
+public:
+    void getdata(); //接收学生数据
+    void showdata() const;    //显示学生成绩
+    void showdatatab() const;   //以表格显示学生数据
+    int return_id() const; //返回学生id
 };
+
+void student::calculate()
+{
+    per = (pMarks + cMarks + mMarks + eMarks + csMarks) / 5.0;
+    if(per>=60)
+        grade = 'A';
+    else if(per>=50)
+        grade = 'B';
+    else if(per>=33)
+        grade = 
+}
 
 void intro();
 void result();       //结果查询页面
@@ -21,7 +44,7 @@ int main()
     intro();
     do
     {
-        system("cls");
+        system("clear");
         cout << "\n\n\n\tMAIN MENU";
         cout << "\n\n\t01. RESULT MENU";
         cout << "\n\n\t02. EDIT MENU";
@@ -72,14 +95,14 @@ void result()
     int num;
     do
     {
-        system("cls");
+        system("clear");
         cout << "\n\n\n\tRESULT MENU";
         cout << "\n\n\n\t1. Class Result";
         cout << "\n\n\t2. Student Report Card";
         cout << "\n\n\t3. Back to Main Menu";
         cout << "\n\n\n\tEnter Choice (1/2/3)? ";
         cin >> op;
-        system("cls");
+        system("clear");
 
         switch (op)
         {
@@ -104,7 +127,26 @@ void result()
 
 void class_result()
 {
-
+    student st;
+    ifstream file;
+    file.open("student.dat", ios::binary);
+    if(!file)
+    {
+        cout << "File could not open! Press any key...";
+        cin.ignore();
+        cin.get();
+        return;
+    }
+    cout << "\n\n\t\tALL STUDENT RESULT\n\n";
+    cout << "==========================================================\n";
+    cout << "R.No       Name        P   C   M   E   CS   %age   Grade" << endl;
+    cout << "==========================================================\n";
+    while(file.read(reinterpret_cast<char *>(&st),sizeof(student)))
+        st.showdatatab();
+    cout << "\n\tPress any key...";
+    cin.ignore();
+    cin.get();
+    file.close();
 }
 
 void student_result(int num)
